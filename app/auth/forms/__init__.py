@@ -32,7 +32,7 @@ class register_form(FlaskForm):
     confirm = PasswordField('Repeat Password', description="Please retype your password to confirm it is correct")
     submit = SubmitField()
 
-    def validate_password(self):
+    def validate_password(self, password):
         errors = []
         lower_case_chars = "abcdefghijklmnopqrstuvwxyz"
         has_lower_case = False
@@ -59,7 +59,7 @@ class register_form(FlaskForm):
             errors.append(' a special character')
 
         if len(errors) != 0:
-            error_string = f"Your password is missing the following: "
+            error_string = f"Your password is missing the following characteristics: "
             for e in errors:
                 error_string = error_string + e
             raise ValidationError(error_string)
