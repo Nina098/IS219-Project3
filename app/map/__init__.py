@@ -3,18 +3,20 @@ import json
 import logging
 import os
 
-from flask import Blueprint, render_template, abort, url_for, current_app, jsonify
+from flask import Blueprint, render_template, abort, url_for, current_app, jsonify, flash
 from flask_login import current_user, login_required
 from jinja2 import TemplateNotFound
 
 from app.db import db
 from app.db.models import Location
 from app.songs.forms import csv_upload
+from app.map.forms import *
 from werkzeug.utils import secure_filename, redirect
 from flask import Response
 
 map = Blueprint('map', __name__,
-                        template_folder='templates')
+                template_folder='templates')
+
 
 @map.route('/locations', methods=['GET'], defaults={"page": 1})
 @map.route('/locations/<int:page>', methods=['GET'])
@@ -23,20 +25,65 @@ def browse_locations(page):
     per_page = 10
     pagination = Location.query.paginate(page, per_page, error_out=False)
     data = pagination.items
+    edit_url = ("map.location_edit", [("location_id", ":id")])
+    add_url = url_for("map.location_add")
+    delete_url = ('map.location_delete', [('location_id', ':id')])
     try:
-        return render_template('browse_locations.html',data=data,pagination=pagination)
+        return render_template('browse_locations.html', data=data, pagination=pagination, add_url=add_url, edit_url=edit_url, delete_url=delete_url, Location=Location)
     except TemplateNotFound:
         abort(404)
+
 
 @map.route('/locations_datatables/', methods=['GET'])
 def browse_locations_datatables():
-
     data = Location.query.all()
 
     try:
-        return render_template('browse_locations_datatables.html',data=data)
+        return render_template('browse_locations_datatables.html', data=data)
     except TemplateNotFound:
         abort(404)
+
+
+@map.route('/locations/add', methods=['POST', 'GET'])
+@login_required
+def location_add():
+    form = addLocation()
+    if form.validate_on_submit():
+        location = Location(title=form.title.data, longitude=form.longitude.data, latitude=form.latitude.data,
+                            population=form.population.data)
+        db.session.add(location)
+        db.session.commit()
+        flash('Added a new location', 'success')
+        return redirect(url_for('map.browse_locations'))
+
+    try:
+        return render_template('location_new.html', form=form)
+    except TemplateNotFound:
+        abort(404)
+
+@map.route('/locations/<int:location_id>/delete', methods=['POST'])
+@login_required
+def location_delete(location_id):
+    location = Location.query.get(location_id)
+    db.session.delete(location)
+    db.session.commit()
+    flash('Deleted the location', 'success')
+    return redirect(url_for('map.browse_locations'))
+
+@map.route('/locations/<int:location_id>/edit', methods=['POST', 'GET'])
+@login_required
+def location_edit(location_id):
+    location = Location.query.get(location_id)
+    form = addLocation(obj=location)
+    if form.validate_on_submit():
+        db.session.delete(location)
+        location = Location(title=form.title.data, longitude=form.title.data, latitude=form.title.data, population=form.population.data)
+        db.session.add(location)
+        db.session.commit()
+        flash('Edited the location', 'success')
+        return redirect(url_for("map.browse_locations"))
+
+    return render_template('location_new.html', form=form)
 
 @map.route('/api/locations/', methods=['GET'])
 def api_locations():
@@ -54,10 +101,9 @@ def map_locations():
     log = logging.getLogger("myApp")
     log.info(google_api_key)
     try:
-        return render_template('map_locations.html',google_api_key=google_api_key)
+        return render_template('map_locations.html', google_api_key=google_api_key)
     except TemplateNotFound:
         abort(404)
-
 
 
 @map.route('/locations/upload', methods=['POST', 'GET'])
@@ -72,7 +118,8 @@ def location_upload():
         with open(filepath) as file:
             csv_file = csv.DictReader(file)
             for row in csv_file:
-                list_of_locations.append(Location(row['location'],row['longitude'],row['latitude'],row['population']))
+                list_of_locations.append(
+                    Location(row['location'], row['longitude'], row['latitude'], row['population']))
 
         current_user.locations = list_of_locations
         db.session.commit()
