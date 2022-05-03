@@ -32,7 +32,7 @@ class register_form(FlaskForm):
     confirm = PasswordField('Repeat Password', description="Please retype your password to confirm it is correct")
     submit = SubmitField()
 
-    def validate_password(self, password):
+    def validate_password(self):
         errors = []
         lower_case_chars = "abcdefghijklmnopqrstuvwxyz"
         has_lower_case = False
