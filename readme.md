@@ -1,11 +1,11 @@
 # Project Setup
 
-[![Production Workflow](https://github.com/Nina098/IS219_Project3/actions/workflows/prod.yml/badge.svg)](https://github.com/Nina098/IS219_Project3/actions/workflows/prod.yml)
+[![Production Workflow 1](https://github.com/Nina098/IS219-Project3/actions/workflows/prod.yml/badge.svg)](https://github.com/Nina098/IS219-Project3/actions/workflows/prod.yml)
 
 * [Production Deployment](https://lamastra-is219-project3-prod.herokuapp.com/)
 
 
-[![Development Workflow](https://github.com/Nina098/IS219_Project3/actions/workflows/dev.yml/badge.svg)](https://github.com/Nina098/IS219_Project3/actions/workflows/dev.yml)
+[![Development Workflow 3.8](https://github.com/Nina098/IS219-Project3/actions/workflows/dev.yml/badge.svg)](https://github.com/Nina098/IS219-Project3/actions/workflows/dev.yml)
 
 * [Developmental Deployment](https://lamastra-is219-project3-dev.herokuapp.com/)
 
