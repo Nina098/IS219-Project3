@@ -59,7 +59,7 @@ class register_form(FlaskForm):
             errors.append(' a special character')
 
         if len(errors) != 0:
-            error_string = f"Your password is missing the following: "
+            error_string = f"Your password is missing the following characteristics: "
             for e in errors:
                 error_string = error_string + e
             raise ValidationError(error_string)
